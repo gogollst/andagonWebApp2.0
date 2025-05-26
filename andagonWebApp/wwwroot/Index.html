@@ -1,0 +1,802 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zeiterfassungs App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tab-content {
+            display: none;
+        }
+
+            .tab-content.active {
+                display: block;
+            }
+
+        .file-upload {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+            .file-upload input[type=file] {
+                position: absolute;
+                left: 0;
+                top: 0;
+                opacity: 0;
+            }
+
+        .time-entry:hover .delete-entry {
+            display: block;
+        }
+
+        .holiday-approved {
+            background-color: #d1fae5;
+            border-left: 4px solid #10b981;
+        }
+
+        .holiday-pending {
+            background-color: #fef3c7;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .holiday-rejected {
+            background-color: #fee2e2;
+            border-left: 4px solid #ef4444;
+        }
+
+        .sick-leave {
+            background-color: #e0f2fe;
+            border-left: 4px solid #0ea5e9;
+        }
+
+        .expense-approved {
+            background-color: #d1fae5;
+        }
+
+        .expense-pending {
+            background-color: #fef3c7;
+        }
+
+        .expense-rejected {
+            background-color: #fee2e2;
+        }
+
+        .working-time {
+            background-color: #e0f7fa;
+            border-left: 4px solid #00acc1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">andagon App</h1>
+            <p class="text-gray-600">Arbeitszeit, Urlaube, Krankmeldungen und Spesen</p>
+        </header>
+
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+            <nav class="flex flex-wrap border-b">
+                <button class="tab-btn px-6 py-3 font-medium text-gray-600 hover:text-blue-500 active" data-tab="overview">
+                    <i class="fas fa-chart-bar mr-2"></i>Übersicht
+                </button>
+                <button class="tab-btn px-6 py-3 font-medium text-gray-600 hover:text-blue-500" data-tab="time-tracking">
+                    <i class="fas fa-clock mr-2"></i>Arbeitszeit
+                </button>
+                <button class="tab-btn px-6 py-3 font-medium text-gray-600 hover:text-blue-500" data-tab="sick-leave">
+                    <i class="fas fa-procedures mr-2"></i>Krankmeldung
+                </button>
+                <button class="tab-btn px-6 py-3 font-medium text-gray-600 hover:text-blue-500" data-tab="vacation">
+                    <i class="fas fa-umbrella-beach mr-2"></i>Urlaub
+                </button>
+                <button class="tab-btn px-6 py-3 font-medium text-gray-600 hover:text-blue-500" data-tab="projects">
+                    <i class="fas fa-project-diagram mr-2"></i>Projekte
+                </button>
+                <button class="tab-btn px-6 py-3 font-medium text-gray-600 hover:text-blue-500" data-tab="expenses">
+                    <i class="fas fa-receipt mr-2"></i>Spesen
+                </button>
+            </nav>
+
+            <!-- Overview Tab -->
+            <div id="overview" class="tab-content p-6 active">
+                <h2 class="text-xl font-semibold mb-4">Übersicht</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <h3 class="text-lg font-medium text-gray-700">Aktueller Monat</h3>
+                        <p class="text-3xl font-bold text-blue-500" id="current-month">Mai 2023</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <h3 class="text-lg font-medium text-gray-700">Gearbeitete Stunden</h3>
+                        <p class="text-3xl font-bold text-green-500" id="worked-hours">120:30</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <h3 class="text-lg font-medium text-gray-700">Verbleibende Urlaubstage</h3>
+                        <p class="text-3xl font-bold text-orange-500" id="remaining-vacation">15</p>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold mb-4">Kommende Ereignisse</h3>
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <ul class="divide-y divide-gray-200">
+                            <li class="p-4 holiday-approved">
+                                <div class="flex justify-between">
+                                    <div>
+                                        <p class="font-medium">Urlaub</p>
+                                        <p class="text-sm text-gray-600">15.05.2023 - 19.05.2023</p>
+                                    </div>
+                                    <span class="text-sm font-medium text-green-700">Genehmigt</span>
+                                </div>
+                            </li>
+                            <li class="p-4 sick-leave">
+                                <div class="flex justify-between">
+                                    <div>
+                                        <p class="font-medium">Krankmeldung</p>
+                                        <p class="text-sm text-gray-600">22.05.2023 - 24.05.2023</p>
+                                    </div>
+                                    <span class="text-sm font-medium text-blue-700">Eingereicht</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Letzte Arbeitszeiten</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Datum</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ende</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dauer</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">10.05.2023</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">08:30</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">17:15</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">8:45</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">09.05.2023</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">09:00</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">18:00</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">9:00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time Tracking Tab -->
+            <div id="time-tracking" class="tab-content p-6">
+                <h2 class="text-xl font-semibold mb-4">Arbeitszeit erfassen</h2>
+                <form id="time-tracking-form" class="mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="work-date" class="block text-sm font-medium text-gray-700 mb-1">Datum</label>
+                            <input type="date" id="work-date" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="start-time" class="block text-sm font-medium text-gray-700 mb-1">Startzeit</label>
+                                <input type="time" id="start-time" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                            <div>
+                                <label for="end-time" class="block text-sm font-medium text-gray-700 mb-1">Endzeit</label>
+                                <input type="time" id="end-time" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="work-description" class="block text-sm font-medium text-gray-700 mb-1">Beschreibung</label>
+                        <textarea id="work-description" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Tätigkeiten beschreiben" required></textarea>
+                    </div>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium">
+                        <i class="fas fa-save mr-2"></i>Speichern
+                    </button>
+                </form>
+
+                <h2 class="text-xl font-semibold mb-4">Arbeitszeitübersicht</h2>
+                <div class="mb-4 flex justify-between items-center">
+                    <div>
+                        <label for="time-filter-month" class="block text-sm font-medium text-gray-700 mb-1">Monat auswählen</label>
+                        <input type="month" id="time-filter-month" class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="text-lg font-semibold">
+                        Gesamtstunden: <span id="total-hours">0:00</span>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Datum</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ende</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dauer</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Beschreibung</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="time-entries-list" class="bg-white divide-y divide-gray-200">
+                            <tr class="time-entry working-time">
+                                <td class="px-6 py-4 whitespace-nowrap">15.05.2023</td>
+                                <td class="px-6 py-4 whitespace-nowrap">08:30</td>
+                                <td class="px-6 py-4 whitespace-nowrap">17:15</td>
+                                <td class="px-6 py-4 whitespace-nowrap">8:45</td>
+                                <td class="px-6 py-4">Projektarbeit für Kunde XYZ</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <button class="delete-entry text-red-500 hover:text-red-700 hidden">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="time-entry working-time">
+                                <td class="px-6 py-4 whitespace-nowrap">14.05.2023</td>
+                                <td class="px-6 py-4 whitespace-nowrap">09:00</td>
+                                <td class="px-6 py-4 whitespace-nowrap">18:30</td>
+                                <td class="px-6 py-4 whitespace-nowrap">9:30</td>
+                                <td class="px-6 py-4">Teammeeting und Code-Review</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <button class="delete-entry text-red-500 hover:text-red-700 hidden">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-8">
+                    <h2 class="text-xl font-semibold mb-4">Arbeitszeitstatistik</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="text-lg font-medium text-gray-700">Durchschnitt pro Tag</h3>
+                            <p class="text-3xl font-bold text-blue-500" id="avg-hours-day">8:45</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="text-lg font-medium text-gray-700">Arbeitstage</h3>
+                            <p class="text-3xl font-bold text-green-500" id="work-days">2</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="text-lg font-medium text-gray-700">Überstunden</h3>
+                            <p class="text-3xl font-bold text-orange-500" id="overtime">1:15</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sick Leave Tab -->
+            <div id="sick-leave" class="tab-content p-6">
+                <h2 class="text-xl font-semibold mb-4">Krankmeldung erfassen</h2>
+                <form id="sick-leave-form" class="mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="sick-from" class="block text-sm font-medium text-gray-700 mb-1">Von</label>
+                            <input type="date" id="sick-from" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        <div>
+                            <label for="sick-to" class="block text-sm font-medium text-gray-700 mb-1">Bis</label>
+                            <input type="date" id="sick-to" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="sick-reason" class="block text-sm font-medium text-gray-700 mb-1">Begründung</label>
+                        <textarea id="sick-reason" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Krankheitsgrund beschreiben" required></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="sick-file" class="block text-sm font-medium text-gray-700 mb-1">Krankschreibung</label>
+                        <div class="file-upload">
+                            <button type="button" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md font-medium">
+                                <i class="fas fa-file-upload mr-2"></i>Dokument hochladen
+                            </button>
+                            <input type="file" id="sick-file" class="hidden">
+                            <span id="file-name" class="ml-2 text-sm text-gray-600">Keine Datei ausgewählt</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium">
+                        <i class="fas fa-paper-plane mr-2"></i>Absenden
+                    </button>
+                </form>
+
+                <h2 class="text-xl font-semibold mb-4">Meine Krankmeldungen</h2>
+                <div class="mb-4">
+                    <label for="sick-filter-month" class="block text-sm font-medium text-gray-700 mb-1">Monat auswählen</label>
+                    <input type="month" id="sick-filter-month" class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zeitraum</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tage</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dokument</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr class="sick-leave">
+                                <td class="px-6 py-4 whitespace-nowrap">22.05.2023 - 24.05.2023</td>
+                                <td class="px-6 py-4 whitespace-nowrap">3</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">Eingereicht</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <a href="#" class="text-blue-500 hover:text-blue-700">
+                                        <i class="fas fa-file-pdf mr-1"></i>Ansehen
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr class="sick-leave">
+                                <td class="px-6 py-4 whitespace-nowrap">10.03.2023 - 12.03.2023</td>
+                                <td class="px-6 py-4 whitespace-nowrap">3</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Genehmigt</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <a href="#" class="text-blue-500 hover:text-blue-700">
+                                        <i class="fas fa-file-pdf mr-1"></i>Ansehen
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Vacation Tab -->
+            <div id="vacation" class="tab-content p-6">
+                <h2 class="text-xl font-semibold mb-4">Urlaubsantrag stellen</h2>
+                <form id="vacation-form" class="mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="vacation-from" class="block text-sm font-medium text-gray-700 mb-1">Von</label>
+                            <input type="date" id="vacation-from" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        <div>
+                            <label for="vacation-to" class="block text-sm font-medium text-gray-700 mb-1">Bis</label>
+                            <input type="date" id="vacation-to" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="vacation-type" class="block text-sm font-medium text-gray-700 mb-1">Urlaubsart</label>
+                        <select id="vacation-type" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                            <option value="">Bitte auswählen</option>
+                            <option value="paid">Bezahlter Urlaub</option>
+                            <option value="unpaid">Unbezahlter Urlaub</option>
+                            <option value="special">Sonderurlaub</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="vacation-reason" class="block text-sm font-medium text-gray-700 mb-1">Grund</label>
+                        <textarea id="vacation-reason" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Urlaubsgrund beschreiben"></textarea>
+                    </div>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium">
+                        <i class="fas fa-paper-plane mr-2"></i>Antrag stellen
+                    </button>
+                </form>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h2 class="text-xl font-semibold mb-4">Meine Urlaubsanträge</h2>
+                        <div class="mb-4">
+                            <label for="vacation-filter-month" class="block text-sm font-medium text-gray-700 mb-1">Monat auswählen</label>
+                            <input type="month" id="vacation-filter-month" class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zeitraum</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tage</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr class="holiday-approved">
+                                        <td class="px-6 py-4 whitespace-nowrap">15.05.2023 - 19.05.2023</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">5</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Genehmigt</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="holiday-pending">
+                                        <td class="px-6 py-4 whitespace-nowrap">12.06.2023 - 16.06.2023</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">5</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">In Bearbeitung</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="holiday-rejected">
+                                        <td class="px-6 py-4 whitespace-nowrap">03.04.2023 - 07.04.2023</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">5</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">Abgelehnt</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-semibold mb-4">Urlaubsstatistik</h2>
+                        <div class="bg-white p-4 rounded-lg shadow mb-4">
+                            <h3 class="text-lg font-medium text-gray-700 mb-2">Verfügbare Urlaubstage</h3>
+                            <div class="flex items-center mb-2">
+                                <div class="w-full bg-gray-200 rounded-full h-4">
+                                    <div class="bg-green-500 h-4 rounded-full" style="width: 75%"></div>
+                                </div>
+                                <span class="ml-2 font-medium">15/20 Tage</span>
+                            </div>
+                            <p class="text-sm text-gray-600">75% Ihres Jahresurlaubs verbleiben</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="text-lg font-medium text-gray-700 mb-2">Verbrauchter Urlaub nach Monat</h3>
+                            <div class="h-40">
+                                <!-- Placeholder for chart -->
+                                <div class="flex items-end h-32">
+                                    <div class="w-8 h-1/4 bg-blue-200 mx-1"></div>
+                                    <div class="w-8 h-1/2 bg-blue-200 mx-1"></div>
+                                    <div class="w-8 h-3/4 bg-blue-200 mx-1"></div>
+                                    <div class="w-8 h-full bg-blue-500 mx-1"></div>
+                                    <div class="w-8 h-1/3 bg-blue-200 mx-1"></div>
+                                    <div class="w-8 h-1/6 bg-blue-200 mx-1"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-600 mt-2">
+                                    <span>Jan</span>
+                                    <span>Feb</span>
+                                    <span>Mär</span>
+                                    <span>Apr</span>
+                                    <span>Mai</span>
+                                    <span>Jun</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projects Tab -->
+            <div id="projects" class="tab-content p-6">
+                <h2 class="text-xl font-semibold mb-4">Meine Projekte</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <h3 class="text-lg font-medium text-gray-700">Aktive Projekte</h3>
+                        <p class="text-3xl font-bold text-blue-500">4</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <h3 class="text-lg font-medium text-gray-700">Offene Aufgaben</h3>
+                        <p class="text-3xl font-bold text-orange-500">12</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <h3 class="text-lg font-medium text-gray-700">Fällige Aufgaben</h3>
+                        <p class="text-3xl font-bold text-red-500">2</p>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold mb-4">Projektübersicht</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Projekt</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kunde</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aufgaben</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zeitaufwand</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="font-medium">Website Relaunch</div>
+                                        <div class="text-sm text-gray-500">PRJ-2023-001</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">Muster AG</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">In Bearbeitung</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex">
+                                            <span class="text-green-500">5</span>
+                                            <span class="mx-1">/</span>
+                                            <span>8</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">42:30</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="font-medium">App Entwicklung</div>
+                                        <div class="text-sm text-gray-500">PRJ-2023-002</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">Beispiel GmbH</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">Planung</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex">
+                                            <span class="text-green-500">2</span>
+                                            <span class="mx-1">/</span>
+                                            <span>15</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">8:15</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Meine Aufgaben</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aufgabe</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Projekt</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fällig am</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4">
+                                        <div class="font-medium">Design Review</div>
+                                        <div class="text-sm text-gray-500">UI/UX Überprüfung</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">Website Relaunch</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">20.05.2023</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">In Bearbeitung</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4">
+                                        <div class="font-medium">API Integration</div>
+                                        <div class="text-sm text-gray-500">Zahlungssystem</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">App Entwicklung</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">25.05.2023</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">Geplant</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4">
+                                        <div class="font-medium">Bug Fixing</div>
+                                        <div class="text-sm text-gray-500">Login-Probleme</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">Website Relaunch</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">15.05.2023</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">Überfällig</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expenses Tab -->
+            <div id="expenses" class="tab-content p-6">
+                <h2 class="text-xl font-semibold mb-4">Spesen erfassen</h2>
+                <form id="expense-form" class="mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="expense-date" class="block text-sm font-medium text-gray-700 mb-1">Datum</label>
+                            <input type="date" id="expense-date" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        <div>
+                            <label for="expense-type" class="block text-sm font-medium text-gray-700 mb-1">Spesenart</label>
+                            <select id="expense-type" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                                <option value="">Bitte auswählen</option>
+                                <option value="travel">Reisekosten</option>
+                                <option value="meal">Verpflegung</option>
+                                <option value="accommodation">Übernachtung</option>
+                                <option value="material">Materialkosten</option>
+                                <option value="other">Sonstiges</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="expense-amount" class="block text-sm font-medium text-gray-700 mb-1">Betrag (€)</label>
+                            <input type="number" id="expense-amount" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        <div>
+                            <label for="expense-project" class="block text-sm font-medium text-gray-700 mb-1">Projekt</label>
+                            <select id="expense-project" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Kein Projekt</option>
+                                <option value="1">Website Relaunch</option>
+                                <option value="2">App Entwicklung</option>
+                                <option value="3">Marketing Kampagne</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="expense-description" class="block text-sm font-medium text-gray-700 mb-1">Beschreibung</label>
+                        <textarea id="expense-description" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Spesen beschreiben" required></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="expense-receipt" class="block text-sm font-medium text-gray-700 mb-1">Beleg</label>
+                        <div class="file-upload">
+                            <button type="button" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md font-medium">
+                                <i class="fas fa-file-upload mr-2"></i>Beleg hochladen
+                            </button>
+                            <input type="file" id="expense-receipt" class="hidden">
+                            <span id="receipt-name" class="ml-2 text-sm text-gray-600">Keine Datei ausgewählt</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium">
+                        <i class="fas fa-save mr-2"></i>Speichern
+                    </button>
+                </form>
+
+                <h2 class="text-xl font-semibold mb-4">Meine Spesen</h2>
+                <div class="mb-4 flex justify-between items-center">
+                    <div>
+                        <label for="expense-filter-month" class="block text-sm font-medium text-gray-700 mb-1">Monat auswählen</label>
+                        <input type="month" id="expense-filter-month" class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="text-lg font-semibold">
+                        Gesamtbetrag: <span id="total-expenses">0,00 €</span>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Datum</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Art</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Betrag</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Projekt</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr class="expense-approved">
+                                <td class="px-6 py-4 whitespace-nowrap">12.05.2023</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Reisekosten</td>
+                                <td class="px-6 py-4 whitespace-nowrap">86,50 €</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Website Relaunch</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Genehmigt</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <a href="#" class="text-blue-500 hover:text-blue-700">
+                                        <i class="fas fa-eye mr-1"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr class="expense-pending">
+                                <td class="px-6 py-4 whitespace-nowrap">05.05.2023</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Verpflegung</td>
+                                <td class="px-6 py-4 whitespace-nowrap">24,80 €</td>
+                                <td class="px-6 py-4 whitespace-nowrap">App Entwicklung</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">In Bearbeitung</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <a href="#" class="text-blue-500 hover:text-blue-700">
+                                        <i class="fas fa-eye mr-1"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr class="expense-rejected">
+                                <td class="px-6 py-4 whitespace-nowrap">28.04.2023</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Übernachtung</td>
+                                <td class="px-6 py-4 whitespace-nowrap">120,00 €</td>
+                                <td class="px-6 py-4 whitespace-nowrap">-</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">Abgelehnt</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <a href="#" class="text-blue-500 hover:text-blue-700">
+                                        <i class="fas fa-eye mr-1"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons and contents
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+
+                    // Add active class to clicked button and corresponding content
+                    button.classList.add('active');
+                    const tabId = button.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+
+            // File upload display
+            const fileInputs = document.querySelectorAll('input[type=file]');
+            fileInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    const fileName = this.files[0] ? this.files[0].name : 'Keine Datei ausgewählt';
+                    const displayElement = this.id === 'sick-file' ?
+                        document.getElementById('file-name') :
+                        document.getElementById('receipt-name');
+                    displayElement.textContent = fileName;
+                });
+            });
+
+            // Set current month for all month filters
+            const now = new Date();
+            const currentMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+
+            const monthFilters = document.querySelectorAll('input[type=month]');
+            monthFilters.forEach(filter => {
+                filter.value = currentMonth;
+            });
+
+            // Set current date for date inputs
+            const currentDate = now.toISOString().split('T')[0];
+            const dateInputs = document.querySelectorAll('input[type=date]');
+            dateInputs.forEach(input => {
+                if (!input.id.includes('from') && !input.id.includes('to')) {
+                    input.value = currentDate;
+                }
+            });
+
+            // Set current month in overview
+            const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+            document.getElementById('current-month').textContent = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+        });
+
+        // Form submission handlers
+        document.getElementById('time-tracking-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Arbeitszeit erfolgreich gespeichert!');
+            this.reset();
+            document.getElementById('work-date').value = new Date().toISOString().split('T')[0];
+        });
+
+        document.getElementById('sick-leave-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Krankmeldung erfolgreich eingereicht!');
+            this.reset();
+            document.getElementById('file-name').textContent = 'Keine Datei ausgewählt';
+        });
+
+        document.getElementById('vacation-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Urlaubsantrag erfolgreich eingereicht!');
+            this.reset();
+        });
+
+        document.getElementById('expense-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Spesen erfolgreich eingereicht!');
+            this.reset();
+            document.getElementById('expense-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('receipt-name').textContent = 'Keine Datei ausgewählt';
+        });
+    </script>
+</body>
+</html>

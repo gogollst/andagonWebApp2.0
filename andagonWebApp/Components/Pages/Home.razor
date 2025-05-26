@@ -1,0 +1,75 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<h2 class="text-xl font-semibold mb-4">Übersicht</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <div class="bg-white p-4 rounded-lg shadow">
+        <h3 class="text-lg font-medium text-gray-700">Aktueller Monat</h3>
+        <p class="text-3xl font-bold text-blue-500" id="current-month">Mai 2023</p>
+    </div>
+    <div class="bg-white p-4 rounded-lg shadow">
+        <h3 class="text-lg font-medium text-gray-700">Gearbeitete Stunden</h3>
+        <p class="text-3xl font-bold text-green-500" id="worked-hours">120:30</p>
+    </div>
+    <div class="bg-white p-4 rounded-lg shadow">
+        <h3 class="text-lg font-medium text-gray-700">Verbleibende Urlaubstage</h3>
+        <p class="text-3xl font-bold text-orange-500" id="remaining-vacation">15</p>
+    </div>
+</div>
+
+<div class="mb-8">
+    <h3 class="text-lg font-semibold mb-4">Kommende Ereignisse</h3>
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <ul class="divide-y divide-gray-200">
+            <li class="p-4 holiday-approved">
+                <div class="flex justify-between">
+                    <div>
+                        <p class="font-medium">Urlaub</p>
+                        <p class="text-sm text-gray-600">15.05.2023 - 19.05.2023</p>
+                    </div>
+                    <span class="text-sm font-medium text-green-700">Genehmigt</span>
+                </div>
+            </li>
+            <li class="p-4 sick-leave">
+                <div class="flex justify-between">
+                    <div>
+                        <p class="font-medium">Krankmeldung</p>
+                        <p class="text-sm text-gray-600">22.05.2023 - 24.05.2023</p>
+                    </div>
+                    <span class="text-sm font-medium text-blue-700">Eingereicht</span>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div>
+    <h3 class="text-lg font-semibold mb-4">Letzte Arbeitszeiten</h3>
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Datum</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ende</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dauer</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">10.05.2023</td>
+                    <td class="px-6 py-4 whitespace-nowrap">08:30</td>
+                    <td class="px-6 py-4 whitespace-nowrap">17:15</td>
+                    <td class="px-6 py-4 whitespace-nowrap">8:45</td>
+                </tr>
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">09.05.2023</td>
+                    <td class="px-6 py-4 whitespace-nowrap">09:00</td>
+                    <td class="px-6 py-4 whitespace-nowrap">18:00</td>
+                    <td class="px-6 py-4 whitespace-nowrap">9:00</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

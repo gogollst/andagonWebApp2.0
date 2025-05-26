@@ -1,0 +1,186 @@
+﻿@page "/projects"
+@rendermode InteractiveServer
+@using System.Globalization
+
+@inject ILogger<Projects> Logger
+
+<h2 class="text-xl font-semibold mb-4">Projektzeiterfassung</h2>
+
+<EditForm Model="@tb">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Datum</label>
+            <InputDate @bind-Value="tb.Date" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required></InputDate>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Projekt</label>
+            <InputSelect @bind-Value="tb.TaskId" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                <option value="">Projekt auswählen</option>
+                @foreach (var p in projects)
+                {
+                    <option value="@p.id">@p.name</option>
+                }
+            </InputSelect>
+        </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Stunden (HH:mm)</label>
+            <InputText @bind-Value="tb.Hours" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="08:30" required />
+        </div>
+    </div>
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Beschreibung</label>
+        <InputTextArea @bind-Value="tb.Description" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Tätigkeiten beschreiben" />
+    </div>
+    <div class="mb-4 flex items-center">
+        <InputCheckbox @bind-Value="tb.SaveAsWorkTime" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+        <label class="block text-sm font-medium text-gray-700 mb-1 ml-2">Als Arbeitszeit speichern</label>
+    </div>
+    <button type="button" @onclick="HandleValidSubmit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium">
+        <i class="fas fa-save mr-2"></i>Speichern
+    </button>
+</EditForm>
+
+<h2 class="text-xl font-semibold mb-4 mt-8">Projektübersicht</h2>
+<div class="mb-4 flex justify-between items-center">
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Monat auswählen</label>
+        <input type="month" class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" @bind="SelectedMonth" />
+    </div>
+    <div class="text-lg font-semibold">
+        Gesamtstunden: <span>@GetTotalHours(timesheetResults)</span>
+    </div>
+</div>
+<div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Datum</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Projekt</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stunden</th>
+@*                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Beschreibung</th>
+ *@                <th></th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            @if (timesheetResults.Count == 0)
+            {
+                <tr>
+                    <td colspan="5" class="px-6 py-3 text-center text-gray-400">Keine Einträge</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var entry in timesheetResults)
+                {
+                    <tr>
+                        <td class="px-6 py-3">@entry.date.ToString(new CultureInfo("de-DE"))</td>
+                        <td class="px-6 py-3">@entry.description</td>
+                        <td class="px-6 py-3">@entry.Hours</td>
+                        <td class="px-6 py-3">
+                            <button class="text-red-500 hover:underline" @onclick="@(() => RemoveEntry(entry))">Löschen</button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-8">
+    <h2 class="text-xl font-semibold mb-4">Projektstatistik</h2>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        @foreach (var project in projects)
+        {
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="text-lg font-medium text-gray-700">@project.name</h3>
+                <p class="text-3xl font-bold text-blue-500">
+                    @GetTotalHours(timesheetResults.Where(e => e.task_id == project.id).ToList())
+                </p>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    // Datenmodell
+
+    private DateTime selectedMonth = DateTime.Today;
+    private DateTime SelectedMonth
+    {
+        get
+        {
+            return selectedMonth;
+        }    
+        set
+        {
+            selectedMonth = value;
+            FilterByMonth(new ChangeEventArgs { Value = selectedMonth.ToString("yyyy-MM") }).Wait();
+        }
+    } 
+
+    private EditForm editForm;
+    private OdooManager odooManager;
+    private long EmployeeId = 0;
+    private Data.ProjectTimeBooking tb = new Data.ProjectTimeBooking();
+    private List<SimpleResult> projects = new List<SimpleResult>();
+    private List<TimesheetResult> timesheetResults = new();
+    protected override async Task OnInitializedAsync()
+    {
+        if (odooManager != null)   return; // Verhindert mehrfaches Initialisieren
+        odooManager = new();
+        await odooManager.Authenticate();
+        EmployeeId = await odooManager.GetEmployeeIdByEmail("s.gogoll@andagon.com");
+        projects = await odooManager.GetProjectTasksByEmail("s.gogoll@andagon.com");
+        tb.Date = DateTime.Today;
+    }
+    private async Task HandleValidSubmit()
+    {
+        SimpleResult p = await odooManager.GetProjectByTaskId(tb.TaskId);
+        await odooManager.SaveTimeBooking(tb.TaskId, p.id, tb.amount, tb.Description, EmployeeId);
+        // SelectedMonth = DateTime.Today; // Setzt den Monat zurück
+        //timesheetResults = await odooManager.GetTimesheetsByTaskId(tb.Id, EmployeeId);
+    }
+    // Logik
+
+    private void RemoveEntry(TimesheetResult entry)
+    {
+        // projectEntries.Remove(entry);
+        // StateHasChanged();
+    }
+
+    private async Task FilterByMonth(ChangeEventArgs e)
+    {
+        if (e.Value != null && DateTime.TryParse(e.Value.ToString() + "-01", out var parsedDate))
+        {
+            selectedMonth = parsedDate;
+        }
+        else
+        {
+            selectedMonth = DateTime.Today; // oder behalte den bisherigen Wert, falls gewünscht
+        }
+        timesheetResults = await odooManager.GetTimesheetsByMonth(selectedMonth, EmployeeId);
+
+        StateHasChanged();
+    }
+
+
+    // Summiert die Stunden im Format "HH:mm"
+    private string GetTotalHours(List<TimesheetResult> entries)
+    {
+        int totalMinutes = 0;
+        foreach (var entry in entries)
+        {
+            if (TimeSpan.TryParseExact(entry.Hours, "hh\\:mm", CultureInfo.InvariantCulture, out var ts) ||
+                TimeSpan.TryParseExact(entry.Hours, "h\\:mm", CultureInfo.InvariantCulture, out ts))
+            {
+                totalMinutes += (int)ts.TotalMinutes;
+            }
+        }
+        return $"{totalMinutes / 60}:{(totalMinutes % 60):D2}";
+    }
+}
+
+
+

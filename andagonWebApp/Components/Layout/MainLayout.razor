@@ -1,0 +1,15 @@
+﻿@inherits LayoutComponentBase
+
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+    <header class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">andagon App</h1>
+        <p class="text-gray-600">Arbeitszeit, Urlaube, Krankmeldungen und Spesen</p>
+    </header>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+        <NavMenu></NavMenu>
+        <div id="overview" class="tab-content p-6 active">
+            @Body
+        </div>
+        </div>
+</div>

@@ -1,0 +1,166 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tab-content {
+            display: none;
+        }
+
+            .tab-content.active {
+                display: block;
+            }
+
+        .file-upload {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+            .file-upload input[type=file] {
+                position: absolute;
+                left: 0;
+                top: 0;
+                opacity: 0;
+            }
+
+        .time-entry:hover .delete-entry {
+            display: block;
+        }
+
+        .holiday-approved {
+            background-color: #d1fae5;
+            border-left: 4px solid #10b981;
+        }
+
+        .holiday-pending {
+            background-color: #fef3c7;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .holiday-rejected {
+            background-color: #fee2e2;
+            border-left: 4px solid #ef4444;
+        }
+
+        .sick-leave {
+            background-color: #e0f2fe;
+            border-left: 4px solid #0ea5e9;
+        }
+
+        .expense-approved {
+            background-color: #d1fae5;
+        }
+
+        .expense-pending {
+            background-color: #fef3c7;
+        }
+
+        .expense-rejected {
+            background-color: #fee2e2;
+        }
+
+        .working-time {
+            background-color: #e0f7fa;
+            border-left: 4px solid #00acc1;
+        }
+    </style>
+    <ImportMap />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <HeadOutlet />
+</head>
+
+<body class="bg-gray-100 font-sans">
+    <Routes />
+    <script src="_framework/blazor.web.js"></script>
+    <script>
+        // Tab switching functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons and contents
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+
+                    // Add active class to clicked button and corresponding content
+                    button.classList.add('active');
+                    const tabId = button.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+
+            // File upload display
+            const fileInputs = document.querySelectorAll('input[type=file]');
+            fileInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    const fileName = this.files[0] ? this.files[0].name : 'Keine Datei ausgewählt';
+                    const displayElement = this.id === 'sick-file' ?
+                        document.getElementById('file-name') :
+                        document.getElementById('receipt-name');
+                    displayElement.textContent = fileName;
+                });
+            });
+
+            // Set current month for all month filters
+            const now = new Date();
+            const currentMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+
+            const monthFilters = document.querySelectorAll('input[type=month]');
+            monthFilters.forEach(filter => {
+                filter.value = currentMonth;
+            });
+
+            // Set current date for date inputs
+            const currentDate = now.toISOString().split('T')[0];
+            const dateInputs = document.querySelectorAll('input[type=date]');
+            dateInputs.forEach(input => {
+                if (!input.id.includes('from') && !input.id.includes('to')) {
+                    input.value = currentDate;
+                }
+            });
+
+            // Set current month in overview
+            const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+            document.getElementById('current-month').textContent = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+        });
+
+        // Form submission handlers
+        document.getElementById('time-tracking-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Arbeitszeit erfolgreich gespeichert!');
+            this.reset();
+            document.getElementById('work-date').value = new Date().toISOString().split('T')[0];
+        });
+
+        document.getElementById('sick-leave-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Krankmeldung erfolgreich eingereicht!');
+            this.reset();
+            document.getElementById('file-name').textContent = 'Keine Datei ausgewählt';
+        });
+
+        document.getElementById('vacation-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Urlaubsantrag erfolgreich eingereicht!');
+            this.reset();
+        });
+
+        document.getElementById('expense-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Spesen erfolgreich eingereicht!');
+            this.reset();
+            document.getElementById('expense-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('receipt-name').textContent = 'Keine Datei ausgewählt';
+        });
+    </script>
+</body>
+
+</html>

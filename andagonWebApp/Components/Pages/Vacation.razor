@@ -1,0 +1,113 @@
+﻿@page "/vacation"
+<h2 class="text-xl font-semibold mb-4">Urlaubsantrag stellen</h2>
+<form id="vacation-form" class="mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+            <label for="vacation-from" class="block text-sm font-medium text-gray-700 mb-1">Von</label>
+            <input type="date" id="vacation-from" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+        </div>
+        <div>
+            <label for="vacation-to" class="block text-sm font-medium text-gray-700 mb-1">Bis</label>
+            <input type="date" id="vacation-to" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+        </div>
+    </div>
+    <div class="mb-4">
+        <label for="vacation-type" class="block text-sm font-medium text-gray-700 mb-1">Urlaubsart</label>
+        <select id="vacation-type" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+            <option value="">Bitte auswählen</option>
+            <option value="paid">Bezahlter Urlaub</option>
+            <option value="unpaid">Unbezahlter Urlaub</option>
+            <option value="special">Sonderurlaub</option>
+        </select>
+    </div>
+    <div class="mb-4">
+        <label for="vacation-reason" class="block text-sm font-medium text-gray-700 mb-1">Grund</label>
+        <textarea id="vacation-reason" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Urlaubsgrund beschreiben"></textarea>
+    </div>
+    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium">
+        <i class="fas fa-paper-plane mr-2"></i>Antrag stellen
+    </button>
+</form>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div>
+        <h2 class="text-xl font-semibold mb-4">Meine Urlaubsanträge</h2>
+        <div class="mb-4">
+            <label for="vacation-filter-month" class="block text-sm font-medium text-gray-700 mb-1">Monat auswählen</label>
+            <input type="month" id="vacation-filter-month" class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zeitraum</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tage</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr class="holiday-approved">
+                        <td class="px-6 py-4 whitespace-nowrap">15.05.2023 - 19.05.2023</td>
+                        <td class="px-6 py-4 whitespace-nowrap">5</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Genehmigt</span>
+                        </td>
+                    </tr>
+                    <tr class="holiday-pending">
+                        <td class="px-6 py-4 whitespace-nowrap">12.06.2023 - 16.06.2023</td>
+                        <td class="px-6 py-4 whitespace-nowrap">5</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">In Bearbeitung</span>
+                        </td>
+                    </tr>
+                    <tr class="holiday-rejected">
+                        <td class="px-6 py-4 whitespace-nowrap">03.04.2023 - 07.04.2023</td>
+                        <td class="px-6 py-4 whitespace-nowrap">5</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">Abgelehnt</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div>
+        <h2 class="text-xl font-semibold mb-4">Urlaubsstatistik</h2>
+        <div class="bg-white p-4 rounded-lg shadow mb-4">
+            <h3 class="text-lg font-medium text-gray-700 mb-2">Verfügbare Urlaubstage</h3>
+            <div class="flex items-center mb-2">
+                <div class="w-full bg-gray-200 rounded-full h-4">
+                    <div class="bg-green-500 h-4 rounded-full" style="width: 75%"></div>
+                </div>
+                <span class="ml-2 font-medium">15/20 Tage</span>
+            </div>
+            <p class="text-sm text-gray-600">75% Ihres Jahresurlaubs verbleiben</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h3 class="text-lg font-medium text-gray-700 mb-2">Verbrauchter Urlaub nach Monat</h3>
+            <div class="h-40">
+                <!-- Placeholder for chart -->
+                <div class="flex items-end h-32">
+                    <div class="w-8 h-1/4 bg-blue-200 mx-1"></div>
+                    <div class="w-8 h-1/2 bg-blue-200 mx-1"></div>
+                    <div class="w-8 h-3/4 bg-blue-200 mx-1"></div>
+                    <div class="w-8 h-full bg-blue-500 mx-1"></div>
+                    <div class="w-8 h-1/3 bg-blue-200 mx-1"></div>
+                    <div class="w-8 h-1/6 bg-blue-200 mx-1"></div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-600 mt-2">
+                    <span>Jan</span>
+                    <span>Feb</span>
+                    <span>Mär</span>
+                    <span>Apr</span>
+                    <span>Mai</span>
+                    <span>Jun</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+}

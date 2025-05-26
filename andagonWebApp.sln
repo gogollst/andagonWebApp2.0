@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36109.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "andagonWebApp", "andagonWebApp\andagonWebApp.csproj", "{3206D634-C649-4612-B8F6-7AE38CD460EE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OdooManager", "OdooManager\OdooManager.csproj", "{C0F7207A-B023-2B61-E0E5-E116E0CF0E9B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3206D634-C649-4612-B8F6-7AE38CD460EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3206D634-C649-4612-B8F6-7AE38CD460EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3206D634-C649-4612-B8F6-7AE38CD460EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3206D634-C649-4612-B8F6-7AE38CD460EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0F7207A-B023-2B61-E0E5-E116E0CF0E9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0F7207A-B023-2B61-E0E5-E116E0CF0E9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0F7207A-B023-2B61-E0E5-E116E0CF0E9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0F7207A-B023-2B61-E0E5-E116E0CF0E9B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CDEB724E-070F-4CED-BBF9-A5A552F195E8}
+	EndGlobalSection
+EndGlobal
