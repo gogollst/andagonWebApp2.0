@@ -117,18 +117,18 @@
         try
         {
             // Validierung
-            if (SickLeaveModel.SickTo < SickLeaveModel.SickFrom)
+            if (sickLeaveModel.SickTo < sickLeaveModel.SickFrom)
             {
                 ErrorMessage = "Das Enddatum darf nicht vor dem Startdatum liegen.";
                 return;
             }
 
             // eAU-Abruf über DATEV (Platzhalter)
-            var eau = await DatevService.RequestEAUAsync(
-                mitarbeiterId: "MITARBEITER_ID", // Ersetze durch echte ID
-                krankVon: SickLeaveModel.SickFrom,
-                art: SickLeaveModel.Reason
-            );
+            // var eau = await DatevService.RequestEAUAsync(
+            //     mitarbeiterId: "MITARBEITER_ID", // Ersetze durch echte ID
+            //     krankVon: sickLeaveModel.SickFrom,
+            //     art: sickLeaveModel.Reason
+            // );
 
             // Dokument speichern (Platzhalter)
             string documentPath = null;
@@ -141,9 +141,9 @@
             // Krankmeldung speichern
             var newSickLeave = new SickLeaveModel
             {
-                SickFrom = SickLeaveModel.SickFrom,
-                SickTo = SickLeaveModel.SickTo,
-                Reason = SickLeaveModel.Reason,
+                SickFrom = sickLeaveModel.SickFrom,
+                SickTo = sickLeaveModel.SickTo,
+                Reason = sickLeaveModel.Reason,
                 Status = "Eingereicht",
                 DocumentPath = documentPath
             };
@@ -151,16 +151,16 @@
             FilteredSickLeaves = SickLeaves;
 
             // Formular zurücksetzen
-            SickLeaveModel = new();
+            sickLeaveModel = new();
             FileName = "Keine Datei ausgewählt";
             UploadedFile = null;
             ErrorMessage = null;
 
             // eAU-Status in Status integrieren (Beispiel)
-            if (eau?.Status == "Genehmigt") // Annahme: DATEV gibt Status zurück
-            {
-                newSickLeave.Status = "Genehmigt";
-            }
+            // if (eau?.Status == "Genehmigt") // Annahme: DATEV gibt Status zurück
+            // {
+            //     newSickLeave.Status = "Genehmigt";
+            // }
 
             StateHasChanged();
         }
