@@ -219,11 +219,11 @@
     public class SickLeaveModel
     {
         [Required(ErrorMessage = "Das Startdatum ist erforderlich.")]
-        public DateTime SickFrom { get; set; }
+        public DateTime SickFrom { get; set; } = DateTime.Today;
         public bool HalfDay { get; set; } = false;
 
         [Required(ErrorMessage = "Das Enddatum ist erforderlich.")]
-        public DateTime SickTo { get; set; }
+        public DateTime SickTo { get; set; } = DateTime.Today;
 
         [Required(ErrorMessage = "Eine Begründung ist erforderlich.")]
         public string Reason { get; set; }
